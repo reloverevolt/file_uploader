@@ -1,0 +1,12 @@
+.db
+.redis_data
+.env
+.idea
+
+**/migrations/**
+!**/migrations
+!**/migrations/__init__.py
+**/__pycache__/**
+
+.coverage
+**/uploaded_files/**

@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+
+  db:
+    image: postgres:14
+    env_file:
+      - .env
+    volumes:
+      - ./.db/postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: always
+    ports:
+      - 6380:6379
+    volumes:
+      - ./.redis_data:/data
+
+  app:
+    build:
+      context: ./app
+      dockerfile: ./Dockerfile
+    env_file: .env
+    command: >
+      bash -c "
+      poetry run python manage.py makemigrations --noinput &&
+      poetry run python manage.py migrate --noinput &&
+      poetry run python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./app:/code
+    ports:
+      - "${DOCKER_EXPOSE_PORT:-8000}:${DJANGO_PORT:-8000}"
+    depends_on:
+      - db
+
+  worker:
+    build:
+      context: ./app
+      dockerfile: ./Dockerfile
+    env_file: .env
+    command: >
+      bash -c "poetry run python -m celery -A app worker --loglevel=info --concurrency 1 -E"
+    volumes:
+      - ./app:/code
+    depends_on:
+      - app
