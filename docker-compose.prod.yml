@@ -29,11 +29,11 @@ services:
       bash -c "
       poetry run python manage.py makemigrations --noinput &&
       poetry run python manage.py migrate --noinput &&
-      poetry run python manage.py runserver 0.0.0.0:8000"
+      poetry run python manage.py runserver 0.0.0.0:${DOCKER_EXPOSE_PORT_DJANGO:-8000}"
     volumes:
       - ./app:/code
     ports:
-      - "${DOCKER_EXPOSE_PORT:-8000}:${DJANGO_PORT:-8000}"
+      - "${DOCKER_EXPOSE_PORT_DJANGO:-8000}:${DJANGO_PORT:-8000}"
     depends_on:
       - db
 
