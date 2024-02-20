@@ -80,3 +80,8 @@ services:
       - certbot-certs:/etc/letsencrypt/
     depends_on:
       - nginx
+
+volumes:
+  certbot-web:
+  proxy-dhparams:
+  certbot-certs:
