@@ -14,7 +14,6 @@ services:
 
   redis:
     image: redis
-    container_name: redis
     restart: always
     ports:
       - "${DOCKER_EXPOSE_PORT_REDIS:-6379}:6379"
