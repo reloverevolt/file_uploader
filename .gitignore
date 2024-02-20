@@ -8,5 +8,5 @@
 !**/migrations/__init__.py
 **/__pycache__/**
 
-.coverage
+/app/.coverage
 **/uploaded_files/**

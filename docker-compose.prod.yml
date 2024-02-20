@@ -6,6 +6,8 @@ services:
     image: postgres:14
     env_file:
       - .env
+    ports:
+      - "${DOCKER_EXPOSE_PORT_POSTGRES:-5432}:5432"
     volumes:
       - ./.db/postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -15,7 +17,7 @@ services:
     container_name: redis
     restart: always
     ports:
-      - 6380:6379
+      - "${DOCKER_EXPOSE_PORT_REDIS:-6379}:6379"
     volumes:
       - ./.redis_data:/data
 
@@ -47,3 +49,34 @@ services:
       - ./app:/code
     depends_on:
       - app
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+      target: production
+    restart: always
+    depends_on:
+      - app
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - certbot-web:/vol/www
+      - proxy-dhparams:/vol/proxy
+      - certbot-certs:/etc/letsencrypt
+    environment:
+      - DOMAIN=${DOMAIN}
+
+  certbot:
+    build:
+      context: ./certbot
+    command: echo "Skipping..."
+    environment:
+      - EMAIL=${ACME_DEFAULT_EMAIL}
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - certbot-web:/vol/www
+      - certbot-certs:/etc/letsencrypt/
+    depends_on:
+      - nginx
